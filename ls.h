@@ -10,6 +10,7 @@
 #define OUT
 #define MAX_LEN 100
 
+int ls(const char* path);
 int compare(const void* d1, const void* d2);
 int count_entries(DIR* dir);
 int get_entries(DIR* dir, OUT struct dirent entries[]);

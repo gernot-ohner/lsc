@@ -9,14 +9,25 @@
 
 #include "ls.h"
 
-int main() {
+int main(int argc, const char* argv[]) {
 
+    if (argc > 2) printf("Usage: ls [optional: path/to/dir]");
+
+    if (argc == 1) {
+        char pwd[100];
+        getcwd(pwd, 100);
+        ls(pwd);
+    }
+    if (argc == 2) {
+        ls(argv[1]);
+    }
+}
+
+int ls(const char* path) {
     // region declarations & initializations
     DIR* dir;
     struct dirent* de;
-    char pwd[100];
-    getcwd(pwd, 100);
-    dir = opendir(pwd);
+    dir = opendir(path);
     // endregion
 
     int num_of_entries = count_entries(dir);
@@ -29,7 +40,7 @@ int main() {
 
     char entry_strings[num_of_entries][100];
     for (int j = 0; j < num_of_entries; j++)
-        entry_to_string(&entries[j], pwd, entry_strings[j]);
+        entry_to_string(&entries[j], path, entry_strings[j]);
 
 
     for (int j = 0; j < num_of_entries; j++)
@@ -73,14 +84,14 @@ int get_entries(DIR* dir, OUT struct dirent entries[]) {
     return 0;
 }
 
-int entry_to_string(struct dirent* entry, const char* pwd, OUT char* result) {
+int entry_to_string(struct dirent* entry, const char* path, OUT char* result) {
 
     if (entry == NULL) return -1;
 
     char fullpath[MAX_LEN];
     struct stat stats;
 
-    snprintf(fullpath, MAX_LEN, "%s/%s", pwd, entry->d_name);
+    snprintf(fullpath, MAX_LEN, "%s/%s", path, entry->d_name);
 
     stat(fullpath, &stats);
 
@@ -97,7 +108,7 @@ int entry_to_string(struct dirent* entry, const char* pwd, OUT char* result) {
     char* date_string = ctime(&stats.st_ctim.tv_sec);
     date_string[strlen(date_string) - 1] = ' ';
 
-    snprintf(result, 100, "[%s] %s %s %s %ld %s",
+    snprintf(result, 100, "[%s] %s %s  %s %8ld  %s",
              type,
              getpwuid(stats.st_uid)->pw_name,
              getgrgid(stats.st_gid)->gr_name,
